@@ -1,0 +1,9 @@
+pandas
+numpy
+scipy
+tensorflow
+opencv-python
+keras
+keras_vggface
+keras_applications
+batch_face
