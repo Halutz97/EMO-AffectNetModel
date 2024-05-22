@@ -15,6 +15,7 @@ def EE():
     return bm
     
 def load_weights_EE(path):
+    print("Path: ", path)
     EE_AN_model = EE()
     EE_AN_model.load_weights(path)
     EE_AN_model = tf.keras.models.Model(inputs=EE_AN_model.input, outputs=[EE_AN_model.get_layer('features').output])

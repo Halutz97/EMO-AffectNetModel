@@ -1,3 +1,4 @@
 *.pth
 *.pyc
+*.h5
 tf_env/

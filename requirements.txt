@@ -1,9 +1,9 @@
 pandas
 numpy
 scipy
-tensorflow
+tensorflow==2.14.0
 opencv-python
-keras
+keras==2.14.0
 keras_vggface
 keras_applications
 batch_face
