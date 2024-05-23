@@ -35,34 +35,34 @@ def pred_one_video(path):
         # pickle.dump(dict_face_areas, file)
     name_frames = list(dict_face_areas.keys())
     face_areas = list(dict_face_areas.values())
-
+    print("Number of frames after sampling: ", len(name_frames))
     # Take only the first 8 elements of name_frames and face_areas
     # name_frames = name_frames[:8]
     # face_areas = face_areas[:8]
     EE_model = load_weights_EE(args.path_FE_model)
     LSTM_model = load_weights_LSTM(args.path_LSTM_model)
-    print()
-    print("So far so good")
-    print()
+    # print()
+    # print("So far so good")
+    # print()
     features = EE_model(np.stack((face_areas)))
     # Features are tensor of 512 elements for each frame
     # Let's inspect features
-    print("Type of features: ", type(features[0]))
-    print("Shape of features: ", features.shape[0])
+    # print("Type of features: ", type(features[0]))
+    print("Shape of features: ", features.shape)
     # print("features: ", features[0])
-    seq_paths, seq_features = sequences.sequences(name_frames, features, win=10, step=2)
+    seq_paths, seq_features = sequences.sequences(name_frames, features, win=10, step=4)
     # let's inspect seq_paths and seq_features
     # print("Type of seq_paths: ", type(seq_paths))
-    print("Shape of seq_paths: ", len(seq_paths))
-    print("seq_paths: ", seq_paths)
+    print("Number of steps/windows: ", len(seq_paths))
+    # print("seq_paths: ", seq_paths)
     # print("Type of seq_features: ", type(seq_features))
-    print("Shape of seq_features: ", len(seq_features))
+    # print("Shape of seq_features: ", len(seq_features))
     # print("seq_features: ", seq_features)
     # print("Type of seq_features[0]: ", type(seq_features[1]))
-    print("Shape of seq_features[0]: ", len(seq_features[1]))
+    # print("Shape of seq_features[0]: ", len(seq_features[1]))
     # Let's go another level deeper
     # print("Type of seq_features[0][0]: ", type(seq_features[1][1]))
-    print("Shape of seq_features[0][0]: ", len(seq_features[1][1]))
+    # print("Shape of seq_features[0][0]: ", len(seq_features[1][1]))
     # Let's go another level deeper
     # print("Type of seq_features[0][0][0]: ", type(seq_features[1][1][0]))
     # Print it
@@ -87,7 +87,7 @@ def pred_one_video(path):
     df = df[['frame']+ label_model]
     df = sequences.df_group(df, label_model)
 
-    print("Are we here?")
+    # print("Are we here?")
     
     if not os.path.exists(args.path_save):
         print("Let's create a folder to save the report!")
@@ -98,24 +98,25 @@ def pred_one_video(path):
     end_time = time.time() - start_time
 
     # Let's inspect pred
-    print("Type of pred: ", type(pred))
+    # print("Type of pred: ", type(pred))
     print("Shape of pred: ", pred.shape)
-    print("pred: ", pred)
+    # print("pred:")
+    # print(pred)
 
     # What happens if we take the argmax?
-    my_argmax = np.argmax(pred, axis=1)
-    print("Type of my_argmax: ", type(my_argmax))
-    print("Shape of my_argmax: ", my_argmax.shape)
-    print("my_argmax: ", my_argmax)
+    calculate_argmax = np.argmax(pred, axis=1)
+    # print("Type of my_argmax: ", type(calculate_argmax))
+    print("Shape of argmax: ", calculate_argmax.shape)
+    print("argmax: ", calculate_argmax)
 
-    mode_test = stats.mode(np.argmax(pred, axis=1))
+    # mode_test = stats.mode(np.argmax(pred, axis=1))
     # Let's inspect mode_test
-    print("Type of mode_test: ", type(mode_test))
+    # print("Type of mode_test: ", type(mode_test))
     # print("Shape of mode_test: ", mode_test.shape)
-    print("mode_test: ", mode_test)
+    # print("mode_test: ", mode_test)
     # Let's get the mode and count from mode_test
-    print("mode_test.mode: ", mode_test.mode)
-    print("mode_test.count: ", mode_test.count)
+    # print("mode_test.mode: ", mode_test.mode)
+    # print("mode_test.count: ", mode_test.count)
 
     # return 0
     mode_result = stats.mode(np.argmax(pred, axis=1))
@@ -140,4 +141,6 @@ def pred_all_video():
         
 if __name__ == "__main__":
     # pred_all_video()
-    pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST\1001_IEO_ANG_HI.mp4")
+    # pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST\1001_IEO_ANG_HI.mp4")
+    pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST_MP4\1003_IEO_SAD_HI.mp4")
+    
