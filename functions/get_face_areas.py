@@ -13,7 +13,7 @@ class VideoCamera(object):
         self.cur_frame = 0
         self.video = None
         self.dict_face_area = {}
-        self.detector = RetinaFace(gpu_id=0)
+        self.detector = RetinaFace(gpu_id=-1)
 
     def __del__(self):
         self.video.release()
@@ -42,6 +42,7 @@ class VideoCamera(object):
         print('Video duration: {} s'.format(np.round(total_frame/fps, 2)))
         print('Frame width:', w)
         print('Frame height:', h)
+        tracker = 0
         while True:
             _, self.fr = self.video.read()
             if self.fr is None: break

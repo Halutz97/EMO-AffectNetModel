@@ -1,4 +1,6 @@
 *.pth
 *.pyc
 *.h5
+*.csv
+*.pkl
 tf_env/

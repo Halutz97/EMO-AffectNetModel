@@ -8,6 +8,8 @@ from functions import sequences
 from functions import get_face_areas
 from functions.get_models import load_weights_EE, load_weights_LSTM
 
+import pickle
+
 import warnings
 warnings.filterwarnings('ignore', category = FutureWarning)
 
@@ -29,58 +31,46 @@ def pred_one_video(path):
     label_model = ['Neutral', 'Happiness', 'Sadness', 'Surprise', 'Fear', 'Disgust', 'Anger']
     detect = get_face_areas.VideoCamera(path_video=path, conf=args.conf_d)
     dict_face_areas, total_frame = detect.get_frame()
+    # with open('face_areas.pkl', 'wb') as file:
+        # pickle.dump(dict_face_areas, file)
     name_frames = list(dict_face_areas.keys())
-    face_areas = dict_face_areas.values()
+    face_areas = list(dict_face_areas.values())
+
+    # Take only the first 8 elements of name_frames and face_areas
+    # name_frames = name_frames[:8]
+    # face_areas = face_areas[:8]
     EE_model = load_weights_EE(args.path_FE_model)
     LSTM_model = load_weights_LSTM(args.path_LSTM_model)
     print()
     print("So far so good")
     print()
-    print(name_frames)
-    # Print type, dimensions, and other useful info of face_areas
-    print("Type of face_areas: ", type(face_areas))
-    print("Length of face_areas: ", len(face_areas))
-    
-    # face_areas is of the type dict_values
-    # Let's get the first value of face_areas
-    first_face_area = list(face_areas)[0]
-    print("Type of first_face_area: ", type(first_face_area))
-    print("Length of first_face_area: ", len(first_face_area))
-    # Shape of first_face_area: (224, 224, 3)
-    print("Shape of first_face_area: ", first_face_area.shape)
-    print(first_face_area)
+    features = EE_model(np.stack((face_areas)))
+    # Features are tensor of 512 elements for each frame
+    # Let's inspect features
+    print("Type of features: ", type(features[0]))
+    print("Shape of features: ", features.shape[0])
+    # print("features: ", features[0])
+    seq_paths, seq_features = sequences.sequences(name_frames, features, win=10, step=2)
+    # let's inspect seq_paths and seq_features
+    # print("Type of seq_paths: ", type(seq_paths))
+    print("Shape of seq_paths: ", len(seq_paths))
+    print("seq_paths: ", seq_paths)
+    # print("Type of seq_features: ", type(seq_features))
+    print("Shape of seq_features: ", len(seq_features))
+    # print("seq_features: ", seq_features)
+    # print("Type of seq_features[0]: ", type(seq_features[1]))
+    print("Shape of seq_features[0]: ", len(seq_features[1]))
+    # Let's go another level deeper
+    # print("Type of seq_features[0][0]: ", type(seq_features[1][1]))
+    print("Shape of seq_features[0][0]: ", len(seq_features[1][1]))
+    # Let's go another level deeper
+    # print("Type of seq_features[0][0][0]: ", type(seq_features[1][1][0]))
+    # Print it
+    # print("seq_features[0][0][0]: ", seq_features[1][0][0])
 
-    # Let's get element [0][0][0] of first_face_area
-    element0 = first_face_area[0]
-    print("Type of element0: ", type(element0))
-    # Shape
-    print("Shape of element0: ", element0.shape)
-    print(element0)
 
-    # element1 = first_face_area[1]
-    # print(element1)
 
-    # element2 = first_face_area[2]
-    # print(element2)
-
-    print()
-    print("Okay, now we're here")
-
-    # print("Type of face_areas[0]: ", type(face_areas[0]))
-    # print("Length of face_areas[0]: ", len(face_areas[0]))
-    # print("Type of face_areas[0][0]: ", type(face_areas[0][0]))
-    # print("Length of face_areas[0][0]: ", len(face_areas[0][0]))
-    # print("Type of face_areas[0][0][0]: ", type(face_areas[0][0][0]))
-    # print("Length of face_areas[0][0][0]: ", len(face_areas[0][0][0]))
-    # Shape of face_areas: (10, 224, 224, 3)
-    # print("Shape of face_areas: ", face_areas.shape)
-    # Shape of face_areas[0]: (224, 224, 3)
-    # print("Shape of face_areas[0]: ", face_areas[0].shape)
-    # print(face_areas)
-
-    return 0
-    features = EE_model(np.stack(face_areas))
-    seq_paths, seq_features = sequences.sequences(name_frames, features)
+    # return 0
     pred = LSTM_model(np.stack(seq_features)).numpy()
     all_pred = []
     all_path = []
@@ -96,6 +86,8 @@ def pred_one_video(path):
     df['frame'] = all_path+m_f
     df = df[['frame']+ label_model]
     df = sequences.df_group(df, label_model)
+
+    print("Are we here?")
     
     if not os.path.exists(args.path_save):
         print("Let's create a folder to save the report!")
@@ -104,7 +96,36 @@ def pred_one_video(path):
     filename = os.path.basename(path)[:-4] + '.csv'
     df.to_csv(os.path.join(args.path_save,filename), index=False)
     end_time = time.time() - start_time
-    mode = stats.mode(np.argmax(pred, axis=1))[0][0]
+
+    # Let's inspect pred
+    print("Type of pred: ", type(pred))
+    print("Shape of pred: ", pred.shape)
+    print("pred: ", pred)
+
+    # What happens if we take the argmax?
+    my_argmax = np.argmax(pred, axis=1)
+    print("Type of my_argmax: ", type(my_argmax))
+    print("Shape of my_argmax: ", my_argmax.shape)
+    print("my_argmax: ", my_argmax)
+
+    mode_test = stats.mode(np.argmax(pred, axis=1))
+    # Let's inspect mode_test
+    print("Type of mode_test: ", type(mode_test))
+    # print("Shape of mode_test: ", mode_test.shape)
+    print("mode_test: ", mode_test)
+    # Let's get the mode and count from mode_test
+    print("mode_test.mode: ", mode_test.mode)
+    print("mode_test.count: ", mode_test.count)
+
+    # return 0
+    mode_result = stats.mode(np.argmax(pred, axis=1))
+    if mode_result.mode.shape == ():
+        # Scalar scenario: mode is a single value scalar
+        mode = mode_result.mode
+    else:
+        # Array scenario: mode is an array
+        mode = mode_result.mode[0]
+    
     print('Report saved in: ', os.path.join(args.path_save,filename))
     print('Predicted emotion: ', label_model[mode])
     print('Lead time: {} s'.format(np.round(end_time, 2)))
