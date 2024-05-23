@@ -42,7 +42,6 @@ class VideoCamera(object):
         print('Video duration: {} s'.format(np.round(total_frame/fps, 2)))
         print('Frame width:', w)
         print('Frame height:', h)
-        tracker = 0
         while True:
             _, self.fr = self.video.read()
             if self.fr is None: break

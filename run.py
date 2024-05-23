@@ -9,6 +9,7 @@ from functions import get_face_areas
 from functions.get_models import load_weights_EE, load_weights_LSTM
 
 import pickle
+from select_video_subset import select_video_subset
 
 import warnings
 warnings.filterwarnings('ignore', category = FutureWarning)
@@ -25,7 +26,7 @@ parser.add_argument('--path_LSTM_model', type=str, default='models/LSTM/RAVDESS_
 
 args = parser.parse_args()
 
-def pred_one_video(path):
+def pred_one_video(path, true_label):
     print("We're here!")
     start_time = time.time()
     label_model = ['Neutral', 'Happiness', 'Sadness', 'Surprise', 'Fear', 'Disgust', 'Anger']
@@ -129,6 +130,7 @@ def pred_one_video(path):
     
     print('Report saved in: ', os.path.join(args.path_save,filename))
     print('Predicted emotion: ', label_model[mode])
+    print('True emotion: ', true_label)
     print('Lead time: {} s'.format(np.round(end_time, 2)))
     print()
 
@@ -142,5 +144,14 @@ def pred_all_video():
 if __name__ == "__main__":
     # pred_all_video()
     # pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST\1001_IEO_ANG_HI.mp4")
-    pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST_MP4\1003_IEO_SAD_HI.mp4")
+    # pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST_MP4\1003_IEO_SAD_HI.mp4")
+    root_path = r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST\HI"
+    video_files = select_video_subset(root_path,3)
+    print("video_files: ", video_files)
+    print()
+    for video_file in video_files:
+        # Get emotion from substring in file name
+        true_emotion = video_file.split("_")[2]
+        pred_one_video(os.path.join(root_path, video_file), true_emotion)
+    
     

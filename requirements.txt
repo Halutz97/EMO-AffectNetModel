@@ -7,3 +7,4 @@ keras==2.14.0
 keras_vggface
 keras_applications
 batch_face
+moviepy
