@@ -93,10 +93,17 @@ for image in images:
 # plt.show()
 
 
-# Display all 10 images in a grid with "keys" as titles
-fig, axs = plt.subplots(2, 5, figsize=(20, 10))
+# Display all images in a grid with "keys" as titles
+# Check how many images we have
+num_images = len(processed_images)
+# Create a suitable (non fixed) grid, given the number of images
+num_rows = int(np.ceil(num_images / 5))
+num_cols = 5
+# Create the grid
+fig, axs = plt.subplots(num_rows, num_cols, figsize=(15, 15))
+# fig, axs = plt.subplots(2, 5, figsize=(20, 10))
 axs = axs.ravel()
-for i in range(10):
+for i in range(num_images):
     axs[i].imshow(processed_images[i])
     axs[i].set_title(keys[i])
     axs[i].axis('off')

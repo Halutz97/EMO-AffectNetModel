@@ -27,13 +27,13 @@ parser.add_argument('--path_LSTM_model', type=str, default='models/LSTM/RAVDESS_
 args = parser.parse_args()
 
 def pred_one_video(path, true_label):
-    print("We're here!")
+    # print("We're here!")
     start_time = time.time()
     label_model = ['Neutral', 'Happiness', 'Sadness', 'Surprise', 'Fear', 'Disgust', 'Anger']
     detect = get_face_areas.VideoCamera(path_video=path, conf=args.conf_d)
     dict_face_areas, total_frame = detect.get_frame()
-    # with open('face_areas.pkl', 'wb') as file:
-        # pickle.dump(dict_face_areas, file)
+    with open('face_areas.pkl', 'wb') as file:
+        pickle.dump(dict_face_areas, file)
     name_frames = list(dict_face_areas.keys())
     face_areas = list(dict_face_areas.values())
     print("Number of frames after sampling: ", len(name_frames))
@@ -51,9 +51,14 @@ def pred_one_video(path, true_label):
     # print("Type of features: ", type(features[0]))
     print("Shape of features: ", features.shape)
     # print("features: ", features[0])
-    seq_paths, seq_features = sequences.sequences(name_frames, features, win=10, step=4)
+    step_size = 2
+    window_size = 5
+    seq_paths, seq_features = sequences.sequences(name_frames, features, win=window_size, step=step_size)
     # let's inspect seq_paths and seq_features
     # print("Type of seq_paths: ", type(seq_paths))
+    print("Step size: ", step_size)
+    print("Window size: ", window_size)
+    print("Sampled frames ", list(range(0,len(name_frames)+1,step_size)))
     print("Number of steps/windows: ", len(seq_paths))
     # print("seq_paths: ", seq_paths)
     # print("Type of seq_features: ", type(seq_features))
@@ -145,13 +150,15 @@ if __name__ == "__main__":
     # pred_all_video()
     # pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST\1001_IEO_ANG_HI.mp4")
     # pred_one_video(r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST_MP4\1003_IEO_SAD_HI.mp4")
+    emotion_dict = {"NEU": "Neutral", "HAP": "Happiness", "SAD": "Sadness", "SUR": "Surprise", "FEA": "Fear", "DIS": "Disgust", "ANG": "Anger"}
     root_path = r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST\HI"
-    video_files = select_video_subset(root_path,3)
+    # pred_one_video(os.path.join(root_path, "1021_IEO_ANG_HI.mp4"),"Anger")
+    video_files = select_video_subset(root_path,1)
     print("video_files: ", video_files)
     print()
     for video_file in video_files:
         # Get emotion from substring in file name
-        true_emotion = video_file.split("_")[2]
+        true_emotion = emotion_dict[video_file.split("_")[2]]
         pred_one_video(os.path.join(root_path, video_file), true_emotion)
     
     
