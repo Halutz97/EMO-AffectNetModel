@@ -4,4 +4,4 @@
 *.csv
 *.pkl
 tf_env/
-notebook_modules/
+*.zip
