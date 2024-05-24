@@ -21,7 +21,7 @@ parser.add_argument('--path_save', type=str, default='report/', help='Path to sa
 parser.add_argument('--conf_d', type=float, default=0.7, help='Elimination threshold for false face areas')
 parser.add_argument('--path_FE_model', type=str, default='models/EmoAffectnet/weights_0_66_37_wo_gl.h5',
                     help='Path to a model for feature extraction')
-parser.add_argument('--path_LSTM_model', type=str, default='models/LSTM/RAVDESS_with_config.h5',
+parser.add_argument('--path_LSTM_model', type=str, default='models/LSTM/CREMA-D_with_config.h5',
                     help='Path to a model for emotion prediction')
 
 args = parser.parse_args()
@@ -41,7 +41,9 @@ def pred_one_video(path, true_label):
     # name_frames = name_frames[:8]
     # face_areas = face_areas[:8]
     EE_model = load_weights_EE(args.path_FE_model)
+    print("Backbone model: ", args.path_FE_model)
     LSTM_model = load_weights_LSTM(args.path_LSTM_model)
+    print("LSTM model: ", args.path_LSTM_model)
     # print()
     # print("So far so good")
     # print()
@@ -51,7 +53,7 @@ def pred_one_video(path, true_label):
     # print("Type of features: ", type(features[0]))
     print("Shape of features: ", features.shape)
     # print("features: ", features[0])
-    step_size = 2
+    step_size = 4
     window_size = 5
     seq_paths, seq_features = sequences.sequences(name_frames, features, win=window_size, step=step_size)
     # let's inspect seq_paths and seq_features
@@ -114,6 +116,8 @@ def pred_one_video(path, true_label):
     # print("Type of my_argmax: ", type(calculate_argmax))
     print("Shape of argmax: ", calculate_argmax.shape)
     print("argmax: ", calculate_argmax)
+    # Convert calculate_argmax to a String
+    return_argmax = np.array2string(calculate_argmax)
 
     # mode_test = stats.mode(np.argmax(pred, axis=1))
     # Let's inspect mode_test
@@ -138,6 +142,7 @@ def pred_one_video(path, true_label):
     print('True emotion: ', true_label)
     print('Lead time: {} s'.format(np.round(end_time, 2)))
     print()
+    return label_model[mode], return_argmax
 
 def pred_all_video():
     path_all_videos = os.listdir(args.path_video)
@@ -153,12 +158,25 @@ if __name__ == "__main__":
     emotion_dict = {"NEU": "Neutral", "HAP": "Happiness", "SAD": "Sadness", "SUR": "Surprise", "FEA": "Fear", "DIS": "Disgust", "ANG": "Anger"}
     root_path = r"C:\MyDocs\DTU\MSc\Thesis\Data\CREMA-D\CREMA-D\TEST\HI"
     # pred_one_video(os.path.join(root_path, "1021_IEO_ANG_HI.mp4"),"Anger")
-    video_files = select_video_subset(root_path,1)
+    video_files = select_video_subset(root_path,100)
     print("video_files: ", video_files)
     print()
+
+    data = pd.DataFrame(columns=['filename', 'emotion', 'predicted', 'argmax'])
+    data['filename'] = video_files
+    data['emotion'] = [emotion_dict[video_file.split("_")[2]] for video_file in video_files]
+    progress = 1
     for video_file in video_files:
+        print(f"Processing video {progress}/{len(video_files)}")
         # Get emotion from substring in file name
         true_emotion = emotion_dict[video_file.split("_")[2]]
-        pred_one_video(os.path.join(root_path, video_file), true_emotion)
+        predicted_emotion, predicted_argmax = pred_one_video(os.path.join(root_path, video_file), true_emotion)
+        data.loc[data['filename'] == video_file, 'predicted'] = predicted_emotion
+        data.loc[data['filename'] == video_file, 'argmax'] = predicted_argmax
+        progress += 1
+    
+    # save the DataFrame to a csv file
+    data.to_csv('video_labels_predicted.csv', index=False)
+    print(data.head())
     
     

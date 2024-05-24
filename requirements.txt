@@ -8,3 +8,5 @@ keras_vggface
 keras_applications
 batch_face
 moviepy
+scikit-learn
+seaborn
