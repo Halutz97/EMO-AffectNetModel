@@ -8,7 +8,27 @@ import matplotlib.pyplot as plt
 import sklearn.metrics
 
 # Load CSV file with the true labels
-data = pd.read_csv(r'save_results\results_W5_S4_CREMA_1.csv')
+data1 = pd.read_csv(r'save_results\run_5_predicted_checkpoint_1150.csv')
+data2 = pd.read_csv(r'save_results\run_5_predicted_checkpoint_2150.csv')
+data3 = pd.read_csv(r'save_results\run_5_predicted_checkpoint_6150.csv')
+data4 = pd.read_csv(r'save_results\run_5_predicted_checkpoint_7442.csv')
+
+# Concatenate vertically
+data = pd.concat([data1, data2, data3, data4], axis=0)
+
+# get the shape of the dataframe
+print(data.shape)
+
+# remove the rows with missing values
+# First check if there are any missing values
+print(data.isnull().sum())
+# Print the rows with missing values
+print(data[data.isnull().any(axis=1)])
+
+# Drop the rows with missing values
+data = data.dropna()
+# Print the new shape of the dataframe
+print(data.shape)
 
 label_model = ['Neutral', 'Happiness', 'Sadness', 'Surprise', 'Fear', 'Disgust', 'Anger']
 
@@ -51,11 +71,11 @@ predicted_keys = [encoding_dict_dataset[label] for label in predicted_classes]
 #     print("Predicted:", prediction, "Actual:", true_labels[i])
 
 
-print("predicted_keys: ")
-print(predicted_keys)
+# print("predicted_keys: ")
+# print(predicted_keys)
 
-print("label_keys: ")
-print(label_keys)
+# print("label_keys: ")
+# print(label_keys)
 
 print(predicted_keys == label_keys)
 

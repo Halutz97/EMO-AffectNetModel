@@ -1,0 +1,3 @@
+Parameters: Window size: 10, Step size: 5.
+Backbone model: weights_0_66_37_wo_gl.h5
+LSTM model: CREMA-D_with_config.h5
